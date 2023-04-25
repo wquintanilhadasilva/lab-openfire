@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  openfire: # http://localhost:9090/
+    build: .
+    container_name: openfire-dev
+    environment:
+      DB_TYPE: postgresql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: openfire_db
+      DB_USER: openfire_user
+      DB_PASS: openfire_password
+      PLUGIN_BROADCAST: broadcast
+      BROADCAST_SERVICE_NAME: Broadcast Service
+    volumes:
+      - ./openfire/conf:/opt/openfire/conf
+      - ./openfire/logs:/opt/openfire/logs
+      - ./openfire/plugins:/opt/openfire/plugins
+    ports:
+      - 9090:9090
+      - 5222:5222
+      - 5223:5223
+      - 7777:7777
+    depends_on:
+      - db
+    # networks:
+    #   - openfire-net
+  db:
+    image: postgres:13-alpine
+    container_name: db-local
+    environment:
+      POSTGRES_USER: openfire_user
+      POSTGRES_PASSWORD: openfire_password
+      POSTGRES_DB: openfire_db
+    volumes:
+      - of_data:/var/lib/postgresql/data
+    ports:
+      - 25432:5432
+    # networks:
+    #   - openfire-net
+
+  mailhog: # http://localhost:8025
+    image: mailhog/mailhog
+    container_name: mail-dev
+    ports: 
+      - 1025:1025
+      - 8025:8025
+
+# networks:
+#   openfire-net:
+#     driver: bridge
+
+volumes:
+  of_data:
